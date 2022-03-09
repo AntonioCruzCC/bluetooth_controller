@@ -21,6 +21,9 @@ class _ControllerPageState extends State<ControllerPage> {
   late double _firstJointValue;
   late double _secondJointValue;
   late double _thirdJointValue;
+  late double _joystickX;
+  late double _joystickY;
+  String _joystickPosition = 'X: 0 Y: 0';
 
   @override
   void initState() {
@@ -125,6 +128,39 @@ class _ControllerPageState extends State<ControllerPage> {
     );
   }
 
+  void joystickMoveListener(StickDragDetails details) {
+    setState(() {
+      _joystickX = details.x;
+      _joystickY = details.y;
+    });
+    setJoystickPositionText();
+  }
+
+  void onJoystickStop() {
+    setState(() {
+      _joystickX = 0;
+      _joystickY = 0;
+    });
+    setJoystickPositionText();
+  }
+
+  void setJoystickPositionText() {
+    setState(() {
+      _joystickPosition = 'X: ' +
+          _joystickX.toStringAsFixed(2) +
+          ' Y: ' +
+          _joystickY.toStringAsFixed(2);
+    });
+  }
+
+  void defineLeftMotorBehaviour() {
+    if (_joystickY < 0 || _joystickX > 0) {
+      //forward
+    } else {
+      //backward
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,16 +173,27 @@ class _ControllerPageState extends State<ControllerPage> {
               children: [
                 Expanded(
                   child: Center(
-                    child: Joystick(
-                      listener: (details) {},
-                      base: const JoystickBase(
-                        width: 300,
-                        height: 300,
-                      ),
-                      stick: const JoystickStick(
-                        width: 70,
-                        height: 70,
-                      ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(_joystickPosition),
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        Joystick(
+                          mode: JoystickMode.horizontalAndVertical,
+                          onStickDragEnd: onJoystickStop,
+                          listener: (details) => joystickMoveListener(details),
+                          base: const JoystickBase(
+                            width: 300,
+                            height: 300,
+                          ),
+                          stick: const JoystickStick(
+                            width: 70,
+                            height: 70,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -56,10 +57,12 @@ class _ControllerPageState extends State<ControllerPage> {
         valueChangedListener(value, 3);
       },
     );
+    Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      sendData();
+    });
   }
 
   void valueChangedListener(double value, int jointIndex) {
-    sendData();
     if (mounted) {
       setState(() {
         switch (jointIndex) {

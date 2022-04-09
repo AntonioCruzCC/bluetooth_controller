@@ -1,4 +1,9 @@
+import 'dart:ffi';
+import 'dart:typed_data';
+
+import 'package:bluetooth_controller/available_devices.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_joystick/flutter_joystick.dart';
 // ignore: implementation_imports
 import 'package:flutter_joystick/src/joystick_stick.dart';
@@ -24,6 +29,8 @@ class _ControllerPageState extends State<ControllerPage> {
   late double _joystickX;
   late double _joystickY;
   String _joystickPosition = 'X: 0 Y: 0';
+
+  BluetoothConnection? connection;
 
   @override
   void initState() {
@@ -52,6 +59,7 @@ class _ControllerPageState extends State<ControllerPage> {
   }
 
   void valueChangedListener(double value, int jointIndex) {
+    sendData();
     if (mounted) {
       setState(() {
         switch (jointIndex) {
@@ -67,6 +75,15 @@ class _ControllerPageState extends State<ControllerPage> {
         }
       });
     }
+  }
+
+  sendData() async {
+    Uint8List data = Uint8List.fromList([
+      _firstJointValue.toInt(),
+      _secondJointValue.toInt(),
+      _thirdJointValue.toInt()
+    ]);
+    FlutterBluetoothSerial.instance.writeBytes(data);
   }
 
   KnobController configKnobController(double value) {
@@ -236,7 +253,17 @@ class _ControllerPageState extends State<ControllerPage> {
                 height: 100,
                 child: Center(
                   child: FloatingActionButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      BluetoothDevice? device =
+                          await showModalBottomSheet<BluetoothDevice>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AvailableDevices();
+                        },
+                      );
+                      FlutterBluetoothSerial.instance
+                          .connectToAddress(device?.address);
+                    },
                     backgroundColor: Colors.blue,
                     child: const Icon(
                       Icons.settings,

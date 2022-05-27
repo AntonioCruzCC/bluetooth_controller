@@ -81,12 +81,32 @@ class _ControllerPageState extends State<ControllerPage> {
   }
 
   sendData() async {
+    int rightMotor = getRightMotorValue().toInt();
+    int leftMotor = getLeftMotorValue().toInt();
     Uint8List data = Uint8List.fromList([
       _firstJointValue.toInt(),
       _secondJointValue.toInt(),
-      _thirdJointValue.toInt()
+      _thirdJointValue.toInt(),
+      rightMotor > 0 ? rightMotor : 0,
+      leftMotor > 0 ? leftMotor : 0,
+      rightMotor < 0 ? rightMotor : 0,
+      leftMotor < 0 ? leftMotor : 0
     ]);
+    getLeftMotorValue();
+    getRightMotorValue();
     FlutterBluetoothSerial.instance.writeBytes(data);
+  }
+
+  double getLeftMotorValue() {
+    double multiplier = _joystickY != 0 ? _joystickY : _joystickX;
+    double val = 65535 * multiplier;
+    return val;
+  }
+
+  double getRightMotorValue() {
+    double multiplier = _joystickY != 0 ? -_joystickY : -_joystickX;
+    double val = 65535 * multiplier;
+    return val;
   }
 
   KnobController configKnobController(double value) {
@@ -171,14 +191,6 @@ class _ControllerPageState extends State<ControllerPage> {
           ' Y: ' +
           _joystickY.toStringAsFixed(2);
     });
-  }
-
-  void defineLeftMotorBehaviour() {
-    if (_joystickY < 0 || _joystickX > 0) {
-      //forward
-    } else {
-      //backward
-    }
   }
 
   @override

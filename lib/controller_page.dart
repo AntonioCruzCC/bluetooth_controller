@@ -27,8 +27,8 @@ class _ControllerPageState extends State<ControllerPage> {
   late double _firstJointValue;
   late double _secondJointValue;
   late double _thirdJointValue;
-  late double _joystickX;
-  late double _joystickY;
+  late double _joystickX = 0;
+  late double _joystickY = 0;
   String _joystickPosition = 'X: 0 Y: 0';
 
   BluetoothConnection? connection;
@@ -87,25 +87,23 @@ class _ControllerPageState extends State<ControllerPage> {
       _firstJointValue.toInt(),
       _secondJointValue.toInt(),
       _thirdJointValue.toInt(),
-      rightMotor > 0 ? rightMotor : 0,
-      leftMotor > 0 ? leftMotor : 0,
-      rightMotor < 0 ? rightMotor : 0,
-      leftMotor < 0 ? leftMotor : 0
+      leftMotor > 0 ? leftMotor.abs() : 0,
+      leftMotor < 0 ? leftMotor.abs() : 0,
+      rightMotor > 0 ? rightMotor.abs() : 0,
+      rightMotor < 0 ? rightMotor.abs() : 0
     ]);
-    getLeftMotorValue();
-    getRightMotorValue();
     FlutterBluetoothSerial.instance.writeBytes(data);
   }
 
   double getLeftMotorValue() {
-    double multiplier = _joystickY != 0 ? _joystickY : _joystickX;
-    double val = 65535 * multiplier;
+    double multiplier = _joystickY != 0 ? -_joystickY : _joystickX;
+    double val = 255 * multiplier;
     return val;
   }
 
   double getRightMotorValue() {
     double multiplier = _joystickY != 0 ? -_joystickY : -_joystickX;
-    double val = 65535 * multiplier;
+    double val = 255 * multiplier;
     return val;
   }
 
